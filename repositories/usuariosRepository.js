@@ -1,4 +1,4 @@
-import db from '../db/connection.js';
+import db from '../db/db.js';
 
 async function create (object){
    try{

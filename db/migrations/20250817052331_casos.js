@@ -8,7 +8,7 @@ exports.up = function (knex) {
         table.string('titulo').notNullable();
         table.string('descricao').notNullable();
         table.enu('status', ['aberto', 'solucionado']).notNullable();
-       table.integer("agentes_id").notNullable().references("id").inTable("agentes").onDelete("cascade");
+       table.integer("agentes_id").references("id").inTable("agentes").onDelete("cascade");
     })
 };
 
