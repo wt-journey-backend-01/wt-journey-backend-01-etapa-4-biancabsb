@@ -81,5 +81,28 @@ const logout = (req, res, next) => {
     next(ApiError.internal("Logout failed", 500, error.message));
   }
 };
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-export { login, signup, logout };
+    const user = await usuariosRepository.findById(id);
+    if (!user) {
+      return next(
+        new ApiError("User not found", 404, {
+          id: "User not found",
+        })
+      );
+    }
+
+    await usuariosRepository.delete(id);
+    res.status(204).send();
+  } catch (error) {
+    next(ApiError.internal("User deletion failed", 500, error.message));
+  }
+};
+module.exports = {
+  login,
+  signup,
+  logout,
+  deleteUser,
+};
