@@ -4,8 +4,8 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-
-router.get("/", authMiddleware, agentesController.getAllAgentes);
+router.use(authMiddleware);
+router.get("/", agentesController.getAllAgentes);
 router.get("/:id", agentesController.getAgenteById);
 router.post("/", agentesController.createAgente);
 router.put("/:id", agentesController.updateAgente);

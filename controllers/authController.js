@@ -5,8 +5,7 @@ import ApiError from "../utils/errorHandler.js";
 
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-
+    const { email, senha } = req.body;
     const user = await usuariosRepository.findByEmail(email);
     if (!user) {
       return next(
@@ -16,7 +15,7 @@ const login = async (req, res, next) => {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(senha, user.senha);
     if (!isPasswordValid) {
       return next(
         new ApiError("Invalid credentials", 401, {
@@ -32,17 +31,41 @@ const login = async (req, res, next) => {
     );
 
     res.status(200).json({
-      message: "Login successful",
-      token,
+      access_token: token,
     });
   } catch (error) {
     next(ApiError.internal("Internal server error", 500, error.message));
   }
 };
 
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
 const signup = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { nome, email, senha, ...extraFields } = req.body;
+
+    // Verificar campos extras
+    if (Object.keys(extraFields).length > 0) {
+      return next(new ApiError("Campos extras não permitidos", 400));
+    }
+
+    if (!nome || typeof nome !== "string" || nome.trim() === "") {
+      return next(new ApiError("Nome é obrigatório", 400));
+    }
+    if (!email || typeof email !== "string" || email.trim() === "") {
+      return next(new ApiError("Email é obrigatório", 400));
+    }
+    if (!senha || typeof senha !== "string") {
+      return next(new ApiError("Senha é obrigatória", 400));
+    }
+    if (!passwordRegex.test(senha)) {
+      return next(
+        new ApiError(
+          "Senha deve ter no mínimo 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais",
+          400
+        )
+      );
+    }
 
     const user = await usuariosRepository.findByEmail(email);
     if (user) {
@@ -53,13 +76,13 @@ const signup = async (req, res, next) => {
       );
     }
 
-    const salt = await bcrypt.genSalt(parseInt(process.env.SALT_ROUNDS, 10));
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const salt = await bcrypt.genSalt(parseInt(process.env.SALT_ROUNDS, 10) || 10);
+    const hashedPassword = await bcrypt.hash(senha, salt);
 
     const newUser = await usuariosRepository.create({
-      name,
+      nome,
       email,
-      password: hashedPassword,
+      senha: hashedPassword,
     });
 
     res.status(201).json({
@@ -108,4 +131,3 @@ export default {
   deleteUser,
 };
 
-   
