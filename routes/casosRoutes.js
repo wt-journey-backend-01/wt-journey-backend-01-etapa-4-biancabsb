@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const casosController = require('../controllers/casosController');
+import casosController from "../controllers/casosController.js";
 
 router.get("/", casosController.getAllCasos);
 router.get("/:id", casosController.getCasoById);
@@ -9,4 +9,4 @@ router.put("/:id", casosController.updateCaso);
 router.patch("/:id", casosController.updateCasoPartial);
 router.delete("/:id", casosController.deleteCaso);
 
-module.exports = router;
+export default router;

@@ -1,4 +1,4 @@
-const agentesRepository = require('../repositories/agentesRepository');
+import agentesRepository from "../repositories/agentesRepository.js";
 class APIError extends Error {
     constructor(message, statusCode) {
         super(message);
@@ -124,7 +124,7 @@ const deleteAgente = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default {
     getAllAgentes,
     getAgenteById,
     createAgente,

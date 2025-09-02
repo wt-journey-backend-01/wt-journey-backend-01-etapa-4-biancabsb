@@ -1,5 +1,5 @@
 
-const db = require('../db/db');
+import db from "../db/db.js";
 async function create(object) {
     try {
         const created = await db("agentes").insert(object).returning('*');
@@ -55,7 +55,7 @@ async function create(object) {
         }
     }
 
-    module.exports = {
+   export default{
         create,
         read,
         readAll,

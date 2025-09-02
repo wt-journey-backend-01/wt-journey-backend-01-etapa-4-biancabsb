@@ -4,7 +4,7 @@ import errorHandler from "./utils/errorHandler.js";
 import agentesRoutes from "./routes/agentesRoutes.js";
 import casosRoutes from "./routes/casosRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import swaggerDocument from "./docs/swagger.json" assert { type: "json" };
+import swaggerDocument from "./docs/swagger.js"
 
 const app = express();
 const PORT = 3000;

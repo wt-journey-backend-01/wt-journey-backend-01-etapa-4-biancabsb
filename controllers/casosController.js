@@ -1,5 +1,5 @@
-const casosRepository = require('../repositories/casosRepository');
-const agentesRepository = require('../repositories/agentesRepository');
+import  casosRepository from "../repositories/casosRepository.js";
+import  agentesRepository from "../repositories/agentesRepository.js";
 
 class APIError extends Error {
     constructor(message, statusCode) {
@@ -138,7 +138,7 @@ const deleteCaso = async (req, res, next) => {
     }
 };
 
-module.exports = {
+export default{
     getAllCasos,
     getCasoById,
     createCaso,

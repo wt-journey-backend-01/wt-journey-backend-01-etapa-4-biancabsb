@@ -1,4 +1,4 @@
-const db = require('../db/db');
+import  db from "../db/db.js";
 async function create(object) {
     try {
         const created = await db("casos").insert(object).returning('*');
@@ -54,7 +54,7 @@ async function remove(id) {
     }
 }
 
-module.exports = {
+export default {
     create,
     read,
     readAll,

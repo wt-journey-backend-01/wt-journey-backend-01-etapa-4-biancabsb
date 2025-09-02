@@ -1,7 +1,9 @@
-const express = require("express");
+import express from "express";
+import agentesController from "../controllers/agentesController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const agentesController = require('../controllers/agentesController');
-const authMiddleware = require("../middlewares/authMiddleware");
+
 
 router.get("/", authMiddleware, agentesController.getAllAgentes);
 router.get("/:id", agentesController.getAgenteById);
@@ -10,4 +12,4 @@ router.put("/:id", agentesController.updateAgente);
 router.patch("/:id", agentesController.updateAgentePartial);
 router.delete("/:id", agentesController.deleteAgente);
 
-module.exports = router;
+export default router;
