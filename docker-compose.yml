@@ -1,6 +1,6 @@
 services:
   postgres_dbb:
-    container_name: postgres_dbb
+    container_name: postgres
     image: postgres
     restart: unless-stopped
     ports:
