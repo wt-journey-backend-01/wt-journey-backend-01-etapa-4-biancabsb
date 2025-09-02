@@ -1,13 +1,13 @@
-const express = require("express");
-const swaggerUi = require("swagger-ui-express");
-const errorHandler = require("./utils/errorHandler");
-const agentesRoutes = require("./routes/agentesRoutes");
-const casosRoutes = require("./routes/casosRoutes");
-const authRoutes = require("./routes/authRoutes");
+import express from "express";
+import swaggerUi from "swagger-ui-express";
+import errorHandler from "./utils/errorHandler.js";
+import agentesRoutes from "./routes/agentesRoutes.js";
+import casosRoutes from "./routes/casosRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import swaggerDocument from "./docs/swagger.json" assert { type: "json" };
 
 const app = express();
 const PORT = 3000;
-const swaggerDocument = require("./docs/swagger.json");
 
 app.use(express.json());
 
@@ -21,7 +21,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Arquivo JSON direto
 app.get("/docs-swagger", (req, res) => {
-  res.sendFile(__dirname + "/docs/swagger.json");
+  res.sendFile(new URL("./docs/swagger.json", import.meta.url).pathname);
 });
 
 // Middleware de erro (deve ficar depois das rotas)

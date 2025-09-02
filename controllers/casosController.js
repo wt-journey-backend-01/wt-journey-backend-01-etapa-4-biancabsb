@@ -137,6 +137,7 @@ const deleteCaso = async (req, res, next) => {
         next(error);
     }
 };
+
 module.exports = {
     getAllCasos,
     getCasoById,

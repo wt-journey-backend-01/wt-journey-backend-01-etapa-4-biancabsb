@@ -94,15 +94,18 @@ const deleteUser = async (req, res, next) => {
       );
     }
 
-    await usuariosRepository.delete(id);
+    await usuariosRepository.remove(id);
     res.status(204).send();
   } catch (error) {
     next(ApiError.internal("User deletion failed", 500, error.message));
   }
 };
-module.exports = {
+
+export default {
   login,
   signup,
   logout,
   deleteUser,
 };
+
+   
