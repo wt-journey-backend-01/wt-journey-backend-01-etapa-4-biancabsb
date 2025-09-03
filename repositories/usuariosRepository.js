@@ -1,13 +1,15 @@
 import db from '../db/db.js';
 
-async function create (object){
-   try{
-     const [id] = await db("usuarios").insert(object);
-     return findById(id);
-   } catch (error) {
-     throw error;
-   }
+async function create(object) {
+  try {
+    const [newUser] = await db("usuarios").insert(object).returning("*");
+    return newUser; // já retorna o objeto completo criado
+  } catch (error) {
+    throw error;
+  }
 }
+
+
 
 async function findById(id) {
    try {
