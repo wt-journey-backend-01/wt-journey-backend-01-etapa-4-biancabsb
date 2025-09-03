@@ -11,17 +11,20 @@ export async function seed(knex) {
     {
       titulo: 'Roubo de carro',
       descricao: 'Veículo furtado no centro da cidade',
-      status: 'aberto'
+      status: 'aberto',
+      agentes_id: 1
     },
     {
       titulo: 'Fraude bancária',
       descricao: 'Transações suspeitas em conta corrente',
-      status: 'solucionado'
+      status: 'solucionado',
+      agentes_id: 2
     },
     {
       titulo: 'Desaparecimento',
       descricao: 'Pessoa desaparecida no bairro industrial',
-      status: 'aberto'
+      status: 'aberto',
+      agentes_id: 3
     }
   ]);
 };

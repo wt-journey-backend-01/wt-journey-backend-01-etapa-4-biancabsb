@@ -8,32 +8,28 @@ class APIError extends Error {
     }
 }
 
-// ✅ valida ID genérico
-const validateId = (id, fieldName, next) => {
+// Valida ID genérico
+const validateId = (id, fieldName) => {
     if (isNaN(Number(id)) || Number(id) <= 0) {
-        next(new APIError(`ID inválido para ${fieldName}`, 400));
-        return false;
+        throw new APIError(`ID inválido para ${fieldName}`, 400);
     }
-    return true;
 };
 
-// ✅ valida campos obrigatórios de string
-const validateRequiredField = (value, fieldName, next) => {
+// Valida campos obrigatórios de string
+const validateRequiredField = (value, fieldName) => {
     if (!value || typeof value !== "string" || value.trim() === "") {
-        next(new APIError(`${fieldName} é obrigatório`, 400));
-        return false;
+        throw new APIError(`${fieldName} é obrigatório`, 400);
     }
-    return true;
 };
 
-// ✅ valida status
-const validateStatus = (status, next) => {
+// Valida status
+const validateStatus = (status) => {
     if (!["aberto", "solucionado"].includes(status)) {
-        next(new APIError("Status inválido", 400));
-        return false;
+        throw new APIError("Status inválido", 400);
     }
-    return true;
 };
+
+// ======================= Controllers =======================
 
 const getAllCasos = async (req, res, next) => {
     try {
@@ -45,15 +41,13 @@ const getAllCasos = async (req, res, next) => {
 };
 
 const getCasoById = async (req, res, next) => {
-    const { id } = req.params;
-    if (!validateId(id, "caso", next)) return;
-
     try {
+        const { id } = req.params;
+        validateId(id, "caso");
+
         const caso = await casosRepository.read(Number(id));
-        if (!caso) {
-            next(new APIError("Caso não encontrado", 404));
-            return;
-        }
+        if (!caso) throw new APIError("Caso não encontrado", 404);
+
         res.status(200).json(caso);
     } catch (error) {
         next(error);
@@ -64,23 +58,20 @@ const createCaso = async (req, res, next) => {
     try {
         const { titulo, descricao, status, agentes_id, ...rest } = req.body;
 
-        if (!validateRequiredField(titulo, "Título", next)) return;
-        if (!validateRequiredField(descricao, "Descrição", next)) return;
-        if (!status || !validateStatus(status, next)) return;
-        if (!validateId(agentes_id, "agente", next)) return;
+        validateRequiredField(titulo, "Título");
+        validateRequiredField(descricao, "Descrição");
+        validateStatus(status);
+        validateId(agentes_id, "agente");
 
         if (Object.keys(rest).length > 0) {
-            next(
-                new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400)
+            throw new APIError(
+                "Campo(s) inválido(s): " + Object.keys(rest).join(", "),
+                400
             );
-            return;
         }
 
         const agente = await agentesRepository.read(Number(agentes_id));
-        if (!agente) {
-            next(new APIError("Agente não encontrado para o caso", 404));
-            return;
-        }
+        if (!agente) throw new APIError("Agente não encontrado para o caso", 404);
 
         const novoCaso = await casosRepository.create({
             titulo,
@@ -96,33 +87,24 @@ const createCaso = async (req, res, next) => {
 };
 
 const updateCaso = async (req, res, next) => {
-    const { id } = req.params;
-    if (!validateId(id, "caso", next)) return;
-
     try {
+        const { id } = req.params;
+        validateId(id, "caso");
+
         const { titulo, descricao, status, agentes_id, ...rest } = req.body;
 
-        if (!validateRequiredField(titulo, "Título", next)) return;
-        if (!validateRequiredField(descricao, "Descrição", next)) return;
-        if (!status || !validateStatus(status, next)) return;
-        if (!validateId(agentes_id, "agente", next)) return;
+        validateRequiredField(titulo, "Título");
+        validateRequiredField(descricao, "Descrição");
+        validateStatus(status);
+        validateId(agentes_id, "agente");
 
-        if (rest.id !== undefined) {
-            next(new APIError("Não é permitido alterar o ID do caso", 400));
-            return;
-        }
+        if ("id" in req.body) throw new APIError("Não é permitido alterar o ID do caso", 400);
         if (Object.keys(rest).length > 0) {
-            next(
-                new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400)
-            );
-            return;
+            throw new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400);
         }
 
         const agente = await agentesRepository.read(Number(agentes_id));
-        if (!agente) {
-            next(new APIError("Agente não encontrado para o caso", 404));
-            return;
-        }
+        if (!agente) throw new APIError("Agente não encontrado para o caso", 404);
 
         const casoAtualizado = await casosRepository.update(Number(id), {
             titulo,
@@ -131,10 +113,7 @@ const updateCaso = async (req, res, next) => {
             agentes_id: Number(agentes_id),
         });
 
-        if (!casoAtualizado) {
-            next(new APIError("Caso não encontrado", 404));
-            return;
-        }
+        if (!casoAtualizado) throw new APIError("Caso não encontrado", 404);
 
         res.status(200).json(casoAtualizado);
     } catch (error) {
@@ -143,51 +122,39 @@ const updateCaso = async (req, res, next) => {
 };
 
 const updateCasoPartial = async (req, res, next) => {
-    const { id } = req.params;
-    if (!validateId(id, "caso", next)) return;
-
-    const { titulo, descricao, status, agentes_id, ...rest } = req.body;
-
     try {
+        const { id } = req.params;
+        validateId(id, "caso");
+
+        const { titulo, descricao, status, agentes_id, ...rest } = req.body;
         const fieldsToUpdate = {};
 
+        if ("id" in req.body) throw new APIError("Não é permitido alterar o ID do caso", 400);
+        if (Object.keys(rest).length > 0) {
+            throw new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400);
+        }
+
         if (titulo !== undefined) {
-            if (!validateRequiredField(titulo, "Título", next)) return;
+            validateRequiredField(titulo, "Título");
             fieldsToUpdate.titulo = titulo;
         }
         if (descricao !== undefined) {
-            if (!validateRequiredField(descricao, "Descrição", next)) return;
+            validateRequiredField(descricao, "Descrição");
             fieldsToUpdate.descricao = descricao;
         }
         if (status !== undefined) {
-            if (!validateStatus(status, next)) return;
+            validateStatus(status);
             fieldsToUpdate.status = status;
         }
         if (agentes_id !== undefined) {
-            if (!validateId(agentes_id, "agente", next)) return;
+            validateId(agentes_id, "agente");
             const agente = await agentesRepository.read(Number(agentes_id));
-            if (!agente) {
-                next(new APIError("Agente não encontrado para o caso", 404));
-                return;
-            }
+            if (!agente) throw new APIError("Agente não encontrado para o caso", 404);
             fieldsToUpdate.agentes_id = Number(agentes_id);
-        }
-        if (rest.id !== undefined) {
-            next(new APIError("Não é permitido alterar o ID do caso", 400));
-            return;
-        }
-        if (Object.keys(rest).length > 0) {
-            next(
-                new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400)
-            );
-            return;
         }
 
         const casoAtualizado = await casosRepository.update(Number(id), fieldsToUpdate);
-        if (!casoAtualizado) {
-            next(new APIError("Caso não encontrado", 404));
-            return;
-        }
+        if (!casoAtualizado) throw new APIError("Caso não encontrado", 404);
 
         res.status(200).json(casoAtualizado);
     } catch (error) {
@@ -196,15 +163,13 @@ const updateCasoPartial = async (req, res, next) => {
 };
 
 const deleteCaso = async (req, res, next) => {
-    const { id } = req.params;
-    if (!validateId(id, "caso", next)) return;
-
     try {
+        const { id } = req.params;
+        validateId(id, "caso");
+
         const resultado = await casosRepository.remove(Number(id));
-        if (!resultado) {
-            next(new APIError("Caso não encontrado", 404));
-            return;
-        }
+        if (!resultado) throw new APIError("Caso não encontrado", 404);
+
         res.status(204).send();
     } catch (error) {
         next(error);

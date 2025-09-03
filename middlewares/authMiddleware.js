@@ -8,15 +8,15 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ message: "Token não fornecido" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Token inválido" });
-    }
-
-    // Se quiser passar os dados do token pra frente
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      algorithms: ["HS256"], // 🔒 garante que não aceite "none"
+    });
     req.user = decoded;
     next();
-  });
+  } catch (err) {
+    return res.status(401).json({ message: "Token inválido" });
+  }
 }
 
 export default authMiddleware;

@@ -7,7 +7,7 @@ class APIError extends Error {
     }
 }
 
-// ✅ valida ID
+// ✅ Valida ID
 const validateId = (id, next) => {
     if (isNaN(Number(id)) || Number(id) <= 0) {
         next(new APIError("ID inválido", 400));
@@ -16,7 +16,7 @@ const validateId = (id, next) => {
     return true;
 };
 
-// ✅ valida nome (não vazio, só letras e espaços)
+// ✅ Valida nome (não vazio, só letras e espaços)
 const validateNome = (nome, next) => {
     if (!nome || typeof nome !== "string" || nome.trim() === "") {
         next(new APIError("Nome é obrigatório", 400));
@@ -29,7 +29,7 @@ const validateNome = (nome, next) => {
     return true;
 };
 
-// ✅ valida cargo (não vazio)
+// ✅ Valida cargo (não vazio)
 const validateCargo = (cargo, next) => {
     if (!cargo || typeof cargo !== "string" || cargo.trim() === "") {
         next(new APIError("Cargo é obrigatório", 400));
@@ -38,25 +38,34 @@ const validateCargo = (cargo, next) => {
     return true;
 };
 
-// ✅ valida data (YYYY-MM-DD, não futuro)
+// ✅ Nova validação de data (YYYY-MM-DD, não futura, data real)
 const isValidDate = (dateString) => {
     const regex = /^\d{4}-\d{2}-\d{2}$/;
     if (!regex.test(dateString)) return false;
 
-    const date = new Date(dateString + "T00:00:00");
-    const now = new Date();
-
     const [year, month, day] = dateString.split("-").map(Number);
-    if (
-        date.getUTCFullYear() !== year ||
-        date.getUTCMonth() + 1 !== month ||
-        date.getUTCDate() !== day
-    ) {
-        return false;
-    }
 
-    return date <= now;
+    // Faixa de valores
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+
+    // Dias válidos no mês
+    const daysInMonth = new Date(year, month, 0).getDate();
+    if (day > daysInMonth) return false;
+
+    const date = new Date(year, month - 1, day);
+
+    // 🔹 Zerar horas de hoje para comparação por dia
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    // Não pode ser futura
+    if (date > now) return false;
+
+    return true;
 };
+
+// ======================= Controllers =======================
 
 const getAllAgentes = async (req, res, next) => {
     try {
@@ -90,7 +99,12 @@ const createAgente = async (req, res, next) => {
         if (!validateNome(nome, next)) return;
         if (!validateCargo(cargo, next)) return;
         if (!dataDeIncorporacao || !isValidDate(dataDeIncorporacao)) {
-            next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            next(
+                new APIError(
+                    "Data de incorporação inválida. Use formato YYYY-MM-DD e não pode ser futura",
+                    400
+                )
+            );
             return;
         }
 
@@ -116,7 +130,12 @@ const updateAgente = async (req, res, next) => {
         if (!validateNome(nome, next)) return;
         if (!validateCargo(cargo, next)) return;
         if (!dataDeIncorporacao || !isValidDate(dataDeIncorporacao)) {
-            next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            next(
+                new APIError(
+                    "Data de incorporação inválida. Use formato YYYY-MM-DD e não pode ser futura",
+                    400
+                )
+            );
             return;
         }
         if (rest.id !== undefined) {
@@ -160,7 +179,12 @@ const updateAgentePartial = async (req, res, next) => {
         }
         if (dataDeIncorporacao !== undefined) {
             if (!isValidDate(dataDeIncorporacao)) {
-                next(new APIError("Data de incorporação inválida ou no futuro", 400));
+                next(
+                    new APIError(
+                        "Data de incorporação inválida. Use formato YYYY-MM-DD e não pode ser futura",
+                        400
+                    )
+                );
                 return;
             }
             fieldsToUpdate.dataDeIncorporacao = dataDeIncorporacao;
