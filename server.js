@@ -14,7 +14,7 @@ app.use(express.json());
 // Rotas
 app.use("/agentes", agentesRoutes);
 app.use("/casos", casosRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes); 
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
